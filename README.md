@@ -1,2 +1,77 @@
 # Automatic-Routing
-A serverless project has resolved the issue of inefficient network path routing for multiple deployment instances.
+
+## 项目简介
+
+Automatic-Routing是一个智能域名路由系统，可以根据用户的地理位置、网络延迟和DNS解析时间，自动将用户重定向到最佳的域名访问路径。该系统帮助网站所有者优化用户的访问体验，减少加载时间，提高服务可靠性。
+
+## 核心功能
+
+- **多域名管理**：用户可以添加和管理多个指向同一服务的域名
+- **实时性能监测**：监测各域名的访问延迟、DNS解析时间
+- **地理位置感知**：根据用户地理位置智能选择最佳服务器
+- **自动重定向**：无缝将用户重定向到性能最佳的域名
+- **性能分析**：提供详细的性能数据和分析报告
+- **无服务器架构**：高可用性，易于扩展
+
+## 工作原理
+
+1. **用户配置**：用户在.env中添加多个指向同一服务的域名
+2. **数据收集**：系统在用户访问时收集：
+   - 各域名的网络延迟
+   - 用户的地理位置
+   - 目标服务器的地理位置
+   - 各域名的DNS解析时间
+3. **自动重定向**：将用户自动重定向到性能最佳的域名
+
+## 技术架构
+
+- 前端：Vue.js
+- 后端：Node.js
+- 地理位置服务：MaxMind GeoIP
+- 性能监测：自定义探测服务
+- 部署：AWS Lambda, Vercel等无服务器平台
+
+## 安装与使用
+
+### 前提条件
+
+- Node.js 14.0+
+- 多个已配置的域名，全部指向您的服务
+
+### 安装步骤
+
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/automatic-routing.git
+cd automatic-routing
+
+# 安装依赖
+npm install
+
+# 配置环境变量
+cp .env.example .env
+# 编辑.env文件填入必要信息
+
+# 启动开发服务器
+npm run dev
+```
+
+### 配置指南
+
+1. 添加您的主服务域名
+2. 添加其他辅助域名（指向同一服务）
+3. 配置重定向规则（可选，系统默认使用最佳性能策略）
+
+## 贡献指南
+
+欢迎对Automatic-Routing做出贡献！请参考[贡献指南](CONTRIBUTING.md)了解如何参与项目开发。
+
+## 许可证
+
+该项目采用MIT许可证 - 详见[LICENSE](LICENSE)文件
+
+## 联系方式
+
+如有问题或建议，请通过以下方式联系我们：
+- 提交GitHub Issue
+- 发送邮件至：connect@gwly.dpdns.org
