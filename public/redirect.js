@@ -1,6 +1,6 @@
 /**
  * Automatic-Routing 智能域名路由系统
- * 自动重定向脚本 - 增强版
+ * 自动重定向脚本 - v1.5
  */
 
 (function() {
