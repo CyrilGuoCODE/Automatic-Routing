@@ -215,6 +215,189 @@
       border-top: 1px solid #eee;
     }
     
+    /* 高级功能面板样式 */
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-right: 5px;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      background-color: #f0f0f0;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid var(--primary-color);
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .settings-row {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .settings-label {
+      width: 200px;
+      font-weight: 500;
+    }
+
+    select, input {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 3px rgba(52, 152, 219, 0.3);
+    }
+
+    .chart-container {
+      height: 200px;
+      margin: 20px 0;
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .bar {
+      height: 30px;
+      margin: 10px 0;
+      background-color: var(--primary-color);
+      border-radius: 3px;
+      position: relative;
+      transition: width 1s;
+      display: flex;
+      align-items: center;
+      color: white;
+      padding-left: 10px;
+    }
+
+    .bar-label {
+      position: absolute;
+      left: 10px;
+      color: white;
+      z-index: 1;
+    }
+
+    .bar-value {
+      position: absolute;
+      right: 10px;
+      color: white;
+      z-index: 1;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .domain-result {
+      background-color: white;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 15px 0;
+      border-left: 4px solid #ddd;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .domain-result:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .domain-result.best {
+      border-left-color: var(--success-color);
+    }
+
+    .domain-name {
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .best-badge {
+      background-color: var(--success-color);
+      color: white;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .domain-metrics {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .domain-metric {
+      flex: 1;
+      min-width: 130px;
+      margin: 4px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 3px;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .domain-metric:hover {
+      background-color: #f0f0f0;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+    }
+
+    .btn-secondary {
+      background-color: #95a5a6;
+    }
+
+    .btn-secondary:hover {
+      background-color: #7f8c8d;
+    }
+    
     @media (max-width: 768px) {
       .container {
         padding: 15px;
@@ -230,6 +413,23 @@
       
       .card {
         padding: 20px;
+      }
+      
+      .settings-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .settings-label {
+        margin-bottom: 5px;
+      }
+      
+      .domain-metrics {
+        flex-direction: column;
+      }
+      
+      .domain-metric {
+        margin: 5px 0;
       }
     }
   </style>
@@ -370,10 +570,154 @@ AutomaticRouting.init({
       </button>
       <div id="test-results" style="margin-top: 15px;"></div>
     </div>
+
+    <!-- 高级功能面板 -->
+    <div class="card">
+      <div class="card-icon">
+        <!-- 高级功能图标 SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <h2>高级功能</h2>
+      </div>
+
+      <button id="toggle-advanced" class="btn" style="margin-bottom: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        <span>显示高级功能</span>
+      </button>
+
+      <div id="advanced-panel" style="display: none;">
+        <div class="tabs">
+          <div class="tab active" data-tab="test-results">测试结果</div>
+          <div class="tab" data-tab="settings">配置设置</div>
+          <div class="tab" data-tab="manual-test">手动测试</div>
+        </div>
+        
+        <!-- 测试结果标签页 -->
+        <div class="tab-content active" id="test-results-tab">
+          <h3>当前性能状况</h3>
+          
+          <!-- 性能指标图表 -->
+          <div class="chart-container" id="performance-chart">
+            <p>暂无数据，请点击"开始测试"按钮生成性能图表。</p>
+          </div>
+          
+          <div class="domain-results" id="domain-results">
+            <!-- 结果将通过JavaScript动态生成 -->
+            <p>暂无测试结果，请点击"开始测试"按钮。</p>
+          </div>
+          <button class="btn" id="start-test">开始测试</button>
+          <button class="btn btn-secondary" id="stop-redirection">阻止自动重定向</button>
+        </div>
+        
+        <!-- 配置设置标签页 -->
+        <div class="tab-content" id="settings">
+          <h3>测试配置</h3>
+          
+          <div class="settings-row">
+            <div class="settings-label">优先因素：</div>
+            <select id="priority-factor">
+              <option value="combined">综合评分</option>
+              <option value="latency">网络延迟</option>
+              <option value="ttfb">首字节时间</option>
+              <option value="responseTime">响应时间</option>
+            </select>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">测试方法：</div>
+            <select id="test-method">
+              <option value="xhr">XHR请求</option>
+              <option value="fetch">Fetch API</option>
+              <option value="image">图片加载</option>
+              <option value="page">页面加载</option>
+            </select>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">样本数量：</div>
+            <input type="number" id="sample-size" min="1" max="5" value="1">
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">超时时间(毫秒)：</div>
+            <input type="number" id="timeout" min="1000" max="10000" step="1000" value="5000">
+          </div>
+          
+          <h3>指标权重</h3>
+          
+          <div class="settings-row">
+            <div class="settings-label">网络延迟：</div>
+            <input type="range" id="latency-weight" min="0" max="1" step="0.1" value="0.4">
+            <span id="latency-weight-value">0.4</span>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">首字节时间：</div>
+            <input type="range" id="ttfb-weight" min="0" max="1" step="0.1" value="0.3">
+            <span id="ttfb-weight-value">0.3</span>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">响应时间：</div>
+            <input type="range" id="response-time-weight" min="0" max="1" step="0.1" value="0.2">
+            <span id="response-time-weight-value">0.2</span>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">连接稳定性：</div>
+            <input type="range" id="stability-weight" min="0" max="1" step="0.1" value="0.1">
+            <span id="stability-weight-value">0.1</span>
+          </div>
+          
+          <button class="btn" id="apply-settings">应用设置</button>
+        </div>
+        
+        <!-- 手动测试标签页 -->
+        <div class="tab-content" id="manual-test">
+          <h3>手动域名测试</h3>
+          <p>输入域名并测试其性能：</p>
+          
+          <div class="settings-row">
+            <div class="settings-label">域名：</div>
+            <input type="text" id="manual-domain" placeholder="example.com">
+            <button class="btn" id="test-domain" style="margin-left: 10px;">测试域名</button>
+          </div>
+          
+          <div id="manual-test-result" style="display: none; margin-top: 15px;">
+            <h4>测试结果</h4>
+            <div class="domain-result">
+              <div class="domain-name" id="result-domain">example.com</div>
+              <div class="domain-metrics">
+                <div class="domain-metric">
+                  <div class="metric-label">网络延迟</div>
+                  <div class="metric-value" id="result-latency">--</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">首字节时间</div>
+                  <div class="metric-value" id="result-ttfb">--</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">响应时间</div>
+                  <div class="metric-value" id="result-response-time">--</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">状态</div>
+                  <div class="metric-value" id="result-status">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer class="container">
-    <p>Automatic-Routing 智能域名路由系统 &copy; 2025 由 <a href="https://github.com/cyrilguocode" target="_blank" style="color: var(--primary-color); text-decoration: none;">CyrilGuo</a> 开发</p>
+    <p>Automatic-Routing 智能域名路由系统v1.5 &copy; 2025 由 <a href="https://github.com/cyrilguocode" target="_blank" style="color: var(--primary-color); text-decoration: none;">CyrilGuo</a> 开发</p>
     <p>
       <a href="https://github.com/cyrilguocode/automatic-routing" target="_blank" style="color: var(--primary-color); text-decoration: none;">
         <!-- GitHub图标 SVG -->
@@ -592,6 +936,271 @@ AutomaticRouting.init({
           </div>
         `;
       }
+    }
+
+    //================ 高级功能面板相关脚本 ================
+    
+    // 显示/隐藏高级功能面板
+    document.getElementById('toggle-advanced').addEventListener('click', function() {
+      var panel = document.getElementById('advanced-panel');
+      var toggleButton = document.getElementById('toggle-advanced');
+      var toggleText = toggleButton.querySelector('span');
+      var toggleIcon = toggleButton.querySelector('svg');
+      
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        toggleText.textContent = '显示高级功能';
+        toggleIcon.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+      } else {
+        panel.style.display = 'block';
+        toggleText.textContent = '隐藏高级功能';
+        toggleIcon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
+      }
+    });
+    
+    // 标签页切换
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        // 移除所有标签页的active类
+        document.querySelectorAll('.tab').forEach(function(t) {
+          t.classList.remove('active');
+        });
+        
+        // 隐藏所有内容
+        document.querySelectorAll('.tab-content').forEach(function(content) {
+          content.classList.remove('active');
+        });
+        
+        // 激活当前标签页
+        this.classList.add('active');
+        const tabId = this.getAttribute('data-tab');
+        const contentElement = document.getElementById(tabId);
+        if (contentElement) {
+          contentElement.classList.add('active');
+        } else if (tabId === 'test-results') {
+          // 特殊处理test-results标签，因为有了id差异
+          document.getElementById('test-results-tab').classList.add('active');
+        }
+      });
+    });
+    
+    // 权重滑块值显示
+    document.getElementById('latency-weight').addEventListener('input', function() {
+      document.getElementById('latency-weight-value').textContent = this.value;
+    });
+    
+    document.getElementById('ttfb-weight').addEventListener('input', function() {
+      document.getElementById('ttfb-weight-value').textContent = this.value;
+    });
+    
+    document.getElementById('response-time-weight').addEventListener('input', function() {
+      document.getElementById('response-time-weight-value').textContent = this.value;
+    });
+    
+    document.getElementById('stability-weight').addEventListener('input', function() {
+      document.getElementById('stability-weight-value').textContent = this.value;
+    });
+    
+    // 应用设置
+    document.getElementById('apply-settings').addEventListener('click', function() {
+      if (!window.AutomaticRouting || !window.AutomaticRouting.config) {
+        alert('无法访问AutomaticRouting配置，请刷新页面后重试。');
+        return;
+      }
+      
+      const priorityFactor = document.getElementById('priority-factor').value;
+      const testMethod = document.getElementById('test-method').value;
+      const sampleSize = parseInt(document.getElementById('sample-size').value);
+      const timeout = parseInt(document.getElementById('timeout').value);
+      
+      const latencyWeight = parseFloat(document.getElementById('latency-weight').value);
+      const ttfbWeight = parseFloat(document.getElementById('ttfb-weight').value);
+      const responseTimeWeight = parseFloat(document.getElementById('response-time-weight').value);
+      const stabilityWeight = parseFloat(document.getElementById('stability-weight').value);
+      
+      // 更新配置
+      window.AutomaticRouting.config.priorityFactor = priorityFactor;
+      window.AutomaticRouting.config.testMethod = testMethod;
+      window.AutomaticRouting.config.sampleSize = sampleSize;
+      window.AutomaticRouting.config.timeout = timeout;
+      
+      window.AutomaticRouting.config.metrics = {
+        latency: latencyWeight,
+        ttfb: ttfbWeight,
+        responseTime: responseTimeWeight,
+        stability: stabilityWeight
+      };
+      
+      // 显示成功提示
+      const successAlert = document.createElement('div');
+      successAlert.className = 'warning';
+      successAlert.style.marginTop = '10px';
+      successAlert.style.backgroundColor = '#d4edda';
+      successAlert.style.borderLeftColor = 'var(--success-color)';
+      successAlert.innerHTML = `<p>设置已应用！</p>`;
+      document.getElementById('settings').appendChild(successAlert);
+      
+      setTimeout(() => {
+        successAlert.style.opacity = '0';
+        successAlert.style.transition = 'opacity 0.5s';
+        setTimeout(() => successAlert.remove(), 500);
+      }, 3000);
+    });
+    
+    // 创建性能图表
+    function createPerformanceChart(results) {
+      const chartContainer = document.getElementById('performance-chart');
+      
+      // 清空现有内容
+      chartContainer.innerHTML = '';
+      
+      // 找出最大值用于计算比例
+      const maxLatency = Math.max(...results.map(r => r.latency === 9999 ? 0 : r.latency));
+      const maxWidth = 100; // 最大宽度百分比
+      
+      // 为每个域名创建一个条形图
+      results.forEach(result => {
+        // 如果延迟为9999（超时），则显示最小的条
+        const latencyPercent = result.latency === 9999 ? 5 : (result.latency / maxLatency * maxWidth);
+        
+        const barContainer = document.createElement('div');
+        barContainer.className = 'bar-container';
+        
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.width = '0%'; // 初始宽度为0
+        bar.innerHTML = `
+          <span class="bar-label">${result.domain}</span>
+          <span class="bar-value">${result.latency === 9999 ? '超时' : result.latency + 'ms'}</span>
+        `;
+        
+        barContainer.appendChild(bar);
+        chartContainer.appendChild(barContainer);
+        
+        // 动画展示条形
+        setTimeout(() => {
+          bar.style.width = `${latencyPercent}%`;
+        }, 100);
+      });
+    }
+    
+    // 启动批量域名测试
+    document.getElementById('start-test').addEventListener('click', function() {
+      if (!window.AutomaticRouting) {
+        alert('脚本未正确加载，请刷新页面后重试。');
+        return;
+      }
+      
+      const metaTag = document.querySelector('meta[name="automatic-routing-domains"]');
+      if (!metaTag) {
+        alert('未找到域名配置，请检查HTML头部是否包含meta标签。');
+        return;
+      }
+      
+      const domains = metaTag.getAttribute('content').split(',').map(d => d.trim());
+      const resultsContainer = document.getElementById('domain-results');
+      const chartContainer = document.getElementById('performance-chart');
+      
+      // 清空之前的结果
+      resultsContainer.innerHTML = '<div class="spinner"></div><p>正在测试域名，请稍候...</p>';
+      chartContainer.innerHTML = '<div class="spinner"></div><p>正在收集性能数据...</p>';
+      
+      // 收集各域名性能数据
+      Promise.all(domains.map(domain => {
+        return window.AutomaticRouting.testDomain(domain);
+      })).then(results => {
+        // 处理结果
+        resultsContainer.innerHTML = '';
+        
+        // 根据延迟排序结果
+        const sortedResults = [...results].sort((a, b) => a.latency - b.latency);
+        const bestDomain = sortedResults[0]?.domain;
+        
+        // 创建性能图表
+        createPerformanceChart(sortedResults);
+        
+        // 显示结果
+        sortedResults.forEach(result => {
+          const isBest = result.domain === bestDomain;
+          const resultHtml = `
+            <div class="domain-result ${isBest ? 'best' : ''}">
+              <div class="domain-name">
+                <span>${result.domain}</span>
+                ${isBest ? '<span class="best-badge">最佳</span>' : ''}
+              </div>
+              <div class="domain-metrics">
+                <div class="domain-metric">
+                  <div class="metric-label">网络延迟</div>
+                  <div class="metric-value">${result.latency === 9999 ? '超时' : result.latency + 'ms'}</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">首字节时间</div>
+                  <div class="metric-value">${(result.ttfb === 0 || result.ttfb === 9999) ? '--' : result.ttfb + 'ms'}</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">响应时间</div>
+                  <div class="metric-value">${result.responseTime === 9999 ? '超时' : result.responseTime + 'ms'}</div>
+                </div>
+                <div class="domain-metric">
+                  <div class="metric-label">状态</div>
+                  <div class="metric-value">${result.success ? '成功' : '失败'}</div>
+                </div>
+              </div>
+            </div>
+          `;
+          resultsContainer.innerHTML += resultHtml;
+        });
+      }).catch(error => {
+        resultsContainer.innerHTML = `<p>测试失败: ${error.message}</p>`;
+        chartContainer.innerHTML = `<p>无法生成图表: ${error.message}</p>`;
+      });
+    });
+    
+    // 阻止自动重定向
+    document.getElementById('stop-redirection').addEventListener('click', function() {
+      if (window.AutomaticRouting && window.AutomaticRouting.config) {
+        window.AutomaticRouting.config.forceRedirect = false;
+        document.cookie = 'ar_best_domain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        alert('已阻止自动重定向，当前页面将不会跳转。');
+      }
+    });
+    
+    // 手动测试单个域名
+    document.getElementById('test-domain').addEventListener('click', function() {
+      const domain = document.getElementById('manual-domain').value.trim();
+      
+      if (!domain) {
+        alert('请输入有效的域名');
+        return;
+      }
+      
+      if (!window.AutomaticRouting || !window.AutomaticRouting.testDomain) {
+        alert('无法访问测试函数，请刷新页面后重试。');
+        return;
+      }
+      
+      // 显示加载状态
+      document.getElementById('result-domain').textContent = domain;
+      document.getElementById('result-latency').textContent = '测试中...';
+      document.getElementById('result-ttfb').textContent = '测试中...';
+      document.getElementById('result-response-time').textContent = '测试中...';
+      document.getElementById('result-status').textContent = '测试中...';
+      document.getElementById('manual-test-result').style.display = 'block';
+      
+      // 开始测试
+      window.AutomaticRouting.testDomain(domain).then(result => {
+        document.getElementById('result-latency').textContent = result.latency === 9999 ? '超时' : result.latency + 'ms';
+        document.getElementById('result-ttfb').textContent = (result.ttfb === 0 || result.ttfb === 9999) ? '--' : result.ttfb + 'ms';
+        document.getElementById('result-response-time').textContent = result.responseTime === 9999 ? '超时' : result.responseTime + 'ms';
+        document.getElementById('result-status').textContent = result.success ? '成功' : '失败';
+      }).catch(error => {
+        alert('测试失败: ' + error.message);
+      });
+    });
+    
+    // 检测file://协议
+    if (window.location.protocol === 'file:') {
+      document.getElementById('file-warning').style.display = 'block';
     }
   </script>
 </body>
