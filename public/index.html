@@ -6,7 +6,7 @@
   <title>Automatic-Routing | 智能域名路由系统</title>
   <meta name="description" content="Automatic-Routing是一个智能域名路由系统，可以根据用户的网络延迟自动将访问者重定向到最佳的域名。">
   <!-- 配置备用域名列表 -->
-  <meta name="automatic-routing-domains" content="blog.gwly.dpdns.org,gwly.dpdns.org,gwlyweb.pages.dev">
+  <meta name="automatic-routing-domains" content="gwlyweb.pages.dev,blog.gwly.dpdns.org,gwly.dpdns.org">
   <style>
     :root {
       --primary-color: #3498db;
@@ -634,6 +634,10 @@ AutomaticRouting.init({
               <option value="fetch">Fetch API</option>
               <option value="image">图片加载</option>
               <option value="page">页面加载</option>
+              <option value="webrtc">WebRTC连接</option>
+              <option value="tcp-timing">TCP连接时间分析</option>
+              <option value="concurrent">并发连接测试</option>
+              <option value="comprehensive" selected>综合分析(推荐)</option>
             </select>
           </div>
           
@@ -644,33 +648,72 @@ AutomaticRouting.init({
           
           <div class="settings-row">
             <div class="settings-label">超时时间(毫秒)：</div>
-            <input type="number" id="timeout" min="1000" max="10000" step="1000" value="5000">
+            <input type="number" id="timeout" min="1000" max="10000" step="1000" value="8000">
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">使用机器学习权重：</div>
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input type="checkbox" id="use-ml-weights" checked style="margin-right: 8px;">
+              <span>根据网络环境自动选择最佳权重</span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">自适应分析：</div>
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input type="checkbox" id="adaptive-analysis" checked style="margin-right: 8px;">
+              <span>根据网络环境自动选择最佳测试方法</span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">网络环境：</div>
+            <select id="network-environment">
+              <option value="auto" selected>自动检测</option>
+              <option value="broadband">高速宽带</option>
+              <option value="wifi">WiFi网络</option>
+              <option value="mobile4G">4G移动网络</option>
+              <option value="slow">低速网络</option>
+            </select>
           </div>
           
           <h3>指标权重</h3>
           
           <div class="settings-row">
             <div class="settings-label">网络延迟：</div>
-            <input type="range" id="latency-weight" min="0" max="1" step="0.1" value="0.4">
-            <span id="latency-weight-value">0.4</span>
+            <input type="range" id="latency-weight" min="0" max="1" step="0.05" value="0.35">
+            <span id="latency-weight-value">0.35</span>
           </div>
           
           <div class="settings-row">
             <div class="settings-label">首字节时间：</div>
-            <input type="range" id="ttfb-weight" min="0" max="1" step="0.1" value="0.3">
-            <span id="ttfb-weight-value">0.3</span>
+            <input type="range" id="ttfb-weight" min="0" max="1" step="0.05" value="0.25">
+            <span id="ttfb-weight-value">0.25</span>
           </div>
           
           <div class="settings-row">
             <div class="settings-label">响应时间：</div>
-            <input type="range" id="response-time-weight" min="0" max="1" step="0.1" value="0.2">
-            <span id="response-time-weight-value">0.2</span>
+            <input type="range" id="response-time-weight" min="0" max="1" step="0.05" value="0.15">
+            <span id="response-time-weight-value">0.15</span>
           </div>
           
           <div class="settings-row">
             <div class="settings-label">连接稳定性：</div>
-            <input type="range" id="stability-weight" min="0" max="1" step="0.1" value="0.1">
+            <input type="range" id="stability-weight" min="0" max="1" step="0.05" value="0.1">
             <span id="stability-weight-value">0.1</span>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">并发处理能力：</div>
+            <input type="range" id="concurrency-weight" min="0" max="1" step="0.05" value="0.1">
+            <span id="concurrency-weight-value">0.1</span>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-label">连接质量：</div>
+            <input type="range" id="connection-quality-weight" min="0" max="1" step="0.05" value="0.05">
+            <span id="connection-quality-weight-value">0.05</span>
           </div>
           
           <button class="btn" id="apply-settings">应用设置</button>
@@ -874,7 +917,12 @@ AutomaticRouting.init({
       const domains = metaTag.getAttribute('content').split(',').map(d => d.trim());
       
       // 显示测试的域名
-      testResultsDiv.innerHTML = `<p>测试域名: ${domains.join(', ')}</p>`;
+      testResultsDiv.innerHTML = `<p>正在使用${AutomaticRouting.config.testMethod}方法测试域名: ${domains.join(', ')}</p>
+        <div style="text-align:center; padding: 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spinner" style="animation: spin 1s linear infinite;">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="30 60" stroke-linecap="round"></circle>
+          </svg>
+        </div>`;
       
       // 测试每个域名（如果不是本地文件）
       if (window.location.protocol !== 'file:') {
@@ -882,32 +930,193 @@ AutomaticRouting.init({
           return AutomaticRouting.testDomain(domain);
         })).then(domainResults => {
           // 显示结果
-          let html = '<h3>测试结果</h3>';
-          html += '<table>';
-          html += '<tr><th>域名</th><th style="text-align:right">延迟 (ms)</th><th style="text-align:right">TTFB (ms)</th><th style="text-align:center">状态</th></tr>';
+          let html = '<h3>域名性能测试结果</h3>';
           
-          // 排序结果
-          const sortedResults = [...domainResults].sort((a, b) => a.latency - b.latency);
+          // 高级视图开关
+          html += `
+            <div style="margin-bottom: 15px;">
+              <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="advanced-view-toggle" style="margin-right: 8px;">
+                <span>显示高级指标详情</span>
+              </label>
+            </div>
+          `;
+          
+          html += '<table>';
+          html += '<tr><th>域名</th><th style="text-align:right">延迟 (ms)</th><th style="text-align:right">TTFB (ms)</th><th style="text-align:center">状态</th><th style="text-align:right">得分</th></tr>';
+          
+          // 根据当前配置的优先因素排序
+          let sortedResults;
+          
+          if (AutomaticRouting.config.priorityFactor === 'latency') {
+            // 按延迟排序（越低越好）
+            sortedResults = [...domainResults].sort((a, b) => a.latency - b.latency);
+          } else if (AutomaticRouting.config.priorityFactor === 'ttfb') {
+            // 按TTFB排序（越低越好）
+            sortedResults = [...domainResults].sort((a, b) => a.ttfb - b.ttfb);
+          } else {
+            // 计算得分并排序
+            sortedResults = [...domainResults].map(result => {
+              // 计算基础得分（使用与redirect.js相似的逻辑）
+              const latencyScore = result.latency < 100 ? 1 : 
+                               result.latency < 300 ? 0.8 : 
+                               result.latency < 800 ? 0.6 : 
+                               result.latency < 1500 ? 0.4 : 
+                               result.latency < 3000 ? 0.2 : 0.1;
+              
+              const ttfbScore = result.ttfb < 100 ? 1 : 
+                             result.ttfb < 300 ? 0.8 : 
+                             result.ttfb < 800 ? 0.6 : 
+                             result.ttfb < 1500 ? 0.4 : 
+                             result.ttfb < 3000 ? 0.2 : 0.1;
+              
+              // 使用综合得分或自己计算的得分
+              const score = result.comprehensiveScore !== undefined ? 
+                          result.comprehensiveScore : 
+                          (latencyScore * 0.6 + ttfbScore * 0.4);
+              
+              return {
+                ...result,
+                score: score
+              };
+            }).sort((a, b) => b.score - a.score);
+          }
           
           sortedResults.forEach((result, index) => {
             const isBest = index === 0;
+            const scoreValue = result.score !== undefined ? 
+                             (result.score * 100).toFixed(1) + '%' : 
+                             '-';
+            
             html += `<tr class="${isBest ? 'best-domain' : ''}">
               <td>${result.domain} ${isBest ? '<span style="color:#2ecc71; font-size:0.8em; margin-left:5px;">最佳</span>' : ''}</td>
-              <td style="text-align:right">${result.latency}</td>
-              <td style="text-align:right">${result.ttfb}</td>
+              <td style="text-align:right">${result.latency < 9999 ? result.latency : '超时'}</td>
+              <td style="text-align:right">${result.ttfb < 9999 ? result.ttfb : '-'}</td>
               <td style="text-align:center" class="${result.success ? 'status-success' : 'status-fail'}">
                 ${result.success ? 
                   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : 
                   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
                 }
               </td>
+              <td style="text-align:right; font-weight: ${isBest ? 'bold' : 'normal'}; color: ${isBest ? 'var(--success-color)' : 'inherit'}">
+                ${scoreValue}
+              </td>
             </tr>`;
           });
           
           html += '</table>';
-          html += `<p style="margin-top:15px;">最佳域名: <strong style="color:#2ecc71">${sortedResults[0]?.domain || '未知'}</strong></p>`;
+          
+          // 最佳域名总结
+          html += `<p style="margin-top:15px;">最佳域名: <strong style="color:#2ecc71">${sortedResults[0]?.domain || '未知'}</strong>`;
+          
+          if (sortedResults[0]?.testMethods) {
+            html += ` (测试方法: ${sortedResults[0].testMethods.join(', ')})`;
+          } else if (AutomaticRouting.config.testMethod) {
+            html += ` (测试方法: ${AutomaticRouting.config.testMethod})`;
+          }
+          
+          html += '</p>';
+          
+          // 高级详情视图（默认隐藏）
+          html += `<div id="advanced-details" style="display: none; margin-top: 20px;">
+            <h3>高级指标详情</h3>
+            <div class="card" style="margin-top: 15px;">
+              <div style="overflow-x: auto;">
+                <table>
+                  <tr>
+                    <th>域名</th>
+                    <th>DNS解析</th>
+                    <th>TCP连接</th>
+                    <th>TLS握手</th>
+                    <th>响应时间</th>
+                    <th>并发性能</th>
+                    <th>连接质量</th>
+                  </tr>`;
+              
+          sortedResults.forEach((result, index) => {
+            // 提取详细指标
+            const dnsTime = result.dnsTime !== undefined ? `${result.dnsTime}ms` : '-';
+            const tcpTime = result.tcpTime !== undefined ? `${result.tcpTime}ms` : '-';
+            const tlsTime = result.tlsTime !== undefined ? `${result.tlsTime}ms` : '-';
+            const responseTime = result.responseTime < 9999 ? `${result.responseTime}ms` : '-';
+            
+            // 并发性能指标
+            let concurrencyDisplay = '-';
+            if (result.concurrencyScore !== undefined) {
+              const concurrencyPercent = (result.concurrencyScore * 100).toFixed(0);
+              concurrencyDisplay = `${concurrencyPercent}%`;
+              if (result.successRate !== undefined) {
+                concurrencyDisplay += ` (${(result.successRate * 100).toFixed(0)}% 成功率)`;
+              }
+            }
+            
+            // 连接质量指标
+            let connectionQualityDisplay = '-';
+            if (result.connectionQuality !== undefined) {
+              connectionQualityDisplay = `${(result.connectionQuality * 100).toFixed(0)}%`;
+            } else if (result.iceQualityScore !== undefined) {
+              connectionQualityDisplay = `${(result.iceQualityScore * 100).toFixed(0)}%`;
+            }
+            
+            html += `
+              <tr>
+                <td>${result.domain}</td>
+                <td>${dnsTime}</td>
+                <td>${tcpTime}</td>
+                <td>${tlsTime}</td>
+                <td>${responseTime}</td>
+                <td>${concurrencyDisplay}</td>
+                <td>${connectionQualityDisplay}</td>
+              </tr>`;
+          });
+          
+          html += `
+                </table>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-top: 15px;">
+              <h4>网络环境分析</h4>
+              <p id="network-environment-details">正在分析网络环境...</p>
+            </div>
+            
+            <div class="card" style="margin-top: 15px;">
+              <h4>测试使用的配置</h4>
+              <pre style="white-space: pre-wrap; font-size: 0.85em;">${JSON.stringify({
+                testMethod: AutomaticRouting.config.testMethod,
+                priorityFactor: AutomaticRouting.config.priorityFactor,
+                sampleSize: AutomaticRouting.config.sampleSize,
+                useMLWeights: AutomaticRouting.config.useMLWeights,
+                adaptiveAnalysis: AutomaticRouting.config.adaptiveAnalysis,
+                metrics: AutomaticRouting.config.metrics
+              }, null, 2)}</pre>
+            </div>
+          </div>`;
           
           testResultsDiv.innerHTML = html;
+          
+          // 添加高级视图切换事件
+          document.getElementById('advanced-view-toggle').addEventListener('change', function() {
+            document.getElementById('advanced-details').style.display = this.checked ? 'block' : 'none';
+            
+            // 如果显示高级视图，尝试分析网络环境
+            if (this.checked) {
+              const networkEnvElement = document.getElementById('network-environment-details');
+              
+              if (navigator.connection) {
+                const conn = navigator.connection;
+                networkEnvElement.innerHTML = `
+                  <p>连接类型: ${conn.effectiveType || '未知'}</p>
+                  <p>下行速度: ${conn.downlink ? conn.downlink + ' Mbps' : '未知'}</p>
+                  <p>往返时间: ${conn.rtt ? conn.rtt + ' ms' : '未知'}</p>
+                  <p>数据节省: ${conn.saveData ? '开启' : '关闭'}</p>
+                `;
+              } else {
+                networkEnvElement.innerHTML = 'Web Connection API不可用，无法获取详细网络信息。';
+              }
+            }
+          });
+          
         }).catch(error => {
           testResultsDiv.innerHTML = `
             <div class="warning">
@@ -1001,6 +1210,14 @@ AutomaticRouting.init({
       document.getElementById('stability-weight-value').textContent = this.value;
     });
     
+    document.getElementById('concurrency-weight').addEventListener('input', function() {
+      document.getElementById('concurrency-weight-value').textContent = this.value;
+    });
+    
+    document.getElementById('connection-quality-weight').addEventListener('input', function() {
+      document.getElementById('connection-quality-weight-value').textContent = this.value;
+    });
+    
     // 应用设置
     document.getElementById('apply-settings').addEventListener('click', function() {
       if (!window.AutomaticRouting || !window.AutomaticRouting.config) {
@@ -1013,23 +1230,50 @@ AutomaticRouting.init({
       const sampleSize = parseInt(document.getElementById('sample-size').value);
       const timeout = parseInt(document.getElementById('timeout').value);
       
+      // 获取新配置选项
+      const useMLWeights = document.getElementById('use-ml-weights').checked;
+      const adaptiveAnalysis = document.getElementById('adaptive-analysis').checked;
+      const networkEnvironment = document.getElementById('network-environment').value;
+      
       const latencyWeight = parseFloat(document.getElementById('latency-weight').value);
       const ttfbWeight = parseFloat(document.getElementById('ttfb-weight').value);
       const responseTimeWeight = parseFloat(document.getElementById('response-time-weight').value);
       const stabilityWeight = parseFloat(document.getElementById('stability-weight').value);
+      const concurrencyWeight = parseFloat(document.getElementById('concurrency-weight').value);
+      const connectionQualityWeight = parseFloat(document.getElementById('connection-quality-weight').value);
       
       // 更新配置
       window.AutomaticRouting.config.priorityFactor = priorityFactor;
       window.AutomaticRouting.config.testMethod = testMethod;
       window.AutomaticRouting.config.sampleSize = sampleSize;
       window.AutomaticRouting.config.timeout = timeout;
+      window.AutomaticRouting.config.useMLWeights = useMLWeights;
+      window.AutomaticRouting.config.adaptiveAnalysis = adaptiveAnalysis;
       
-      window.AutomaticRouting.config.metrics = {
-        latency: latencyWeight,
-        ttfb: ttfbWeight,
-        responseTime: responseTimeWeight,
-        stability: stabilityWeight
-      };
+      if (networkEnvironment !== 'auto') {
+        // 强制设置特定网络环境的权重
+        if (useMLWeights && window.AutomaticRouting.config.mlWeights[networkEnvironment]) {
+          window.AutomaticRouting.config.metrics = { ...window.AutomaticRouting.config.mlWeights[networkEnvironment] };
+        }
+      } else {
+        // 使用用户自定义权重
+        window.AutomaticRouting.config.metrics = {
+          latency: latencyWeight,
+          ttfb: ttfbWeight,
+          responseTime: responseTimeWeight,
+          stability: stabilityWeight,
+          concurrency: concurrencyWeight,
+          connectionQuality: connectionQualityWeight
+        };
+      }
+      
+      // 验证权重总和不超过1.0
+      const totalWeight = latencyWeight + ttfbWeight + responseTimeWeight + 
+                         stabilityWeight + concurrencyWeight + connectionQualityWeight;
+      
+      if (totalWeight > 1.05) {
+        alert('警告：权重总和超过1.0，可能会导致评分不准确。建议调整各指标权重，使总和接近1.0。');
+      }
       
       // 显示成功提示
       const successAlert = document.createElement('div');
@@ -1037,7 +1281,7 @@ AutomaticRouting.init({
       successAlert.style.marginTop = '10px';
       successAlert.style.backgroundColor = '#d4edda';
       successAlert.style.borderLeftColor = 'var(--success-color)';
-      successAlert.innerHTML = `<p>设置已应用！</p>`;
+      successAlert.innerHTML = `<p>设置已应用！使用${testMethod === 'comprehensive' ? '综合分析' : testMethod}测试方法</p>`;
       document.getElementById('settings').appendChild(successAlert);
       
       setTimeout(() => {
